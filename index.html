@@ -1,0 +1,1240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BillyJean — Tapas & Vins Naturels | Biarritz</title>
+<meta name="description" content="BillyJean — tapas bar et vins naturels au coeur de Biarritz. Cuisine basque, cocktails signatures, ambiance intime.">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+/* ─── Reset & Tokens ─── */
+:root {
+  --midnight: #0A1114;
+  --navy: #0A1628;
+  --gold: #D4A853;
+  --cream: #F5F0E8;
+  --pepper: #C4483E;
+  --smoke: #8B8B8B;
+  --border: #1e1e22;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--midnight);
+  color: var(--cream);
+  font-family: 'Outfit', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+a { color: inherit; text-decoration: none; }
+
+/* ─── Nav ─── */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 20px 40px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: transparent;
+  transition: background 0.4s, backdrop-filter 0.4s, padding 0.4s;
+}
+.nav.scrolled {
+  background: rgba(10, 17, 20, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 14px 40px;
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 700;
+  letter-spacing: 0.05em;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+.nav.scrolled .nav-logo { opacity: 1; }
+.nav-links { display: flex; gap: 32px; align-items: center; }
+.nav-links a {
+  font-size: 13px; font-weight: 400;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--cream); opacity: 0.7;
+  transition: opacity 0.3s;
+}
+.nav-links a:hover { opacity: 1; }
+.nav-links .nav-cta {
+  background: var(--gold); color: var(--midnight);
+  padding: 10px 24px; border-radius: 8px;
+  font-weight: 600; opacity: 1;
+  transition: transform 0.2s, background 0.2s;
+}
+.nav-links .nav-cta:hover { transform: translateY(-1px); background: #e0b45e; }
+
+/* Mobile nav toggle */
+.nav-toggle {
+  display: none; background: none; border: none; cursor: pointer;
+  width: 32px; height: 24px; position: relative; z-index: 101;
+}
+.nav-toggle span {
+  display: block; width: 100%; height: 2px; background: var(--cream);
+  position: absolute; left: 0; transition: all 0.3s;
+}
+.nav-toggle span:nth-child(1) { top: 2px; }
+.nav-toggle span:nth-child(2) { top: 11px; }
+.nav-toggle span:nth-child(3) { top: 20px; }
+.nav-toggle.open span:nth-child(1) { top: 11px; transform: rotate(45deg); }
+.nav-toggle.open span:nth-child(2) { opacity: 0; }
+.nav-toggle.open span:nth-child(3) { top: 11px; transform: rotate(-45deg); }
+
+/* ─── Hero ─── */
+.hero {
+  position: relative;
+  min-height: 100dvh;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  overflow: hidden;
+}
+.hero-canvas {
+  position: absolute; inset: 0; z-index: 0;
+}
+.hero-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background: radial-gradient(ellipse at 50% 50%, transparent 0%, var(--midnight) 75%);
+}
+.hero-content {
+  position: relative; z-index: 2;
+  padding: 40px 24px;
+}
+.hero-headline {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(48px, 12vw, 140px);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  margin-bottom: 16px;
+  min-height: 1.1em;
+}
+.hero-headline .char {
+  display: inline-block;
+  transition: color 0.1s;
+}
+.hero-headline .char.resolved { color: var(--gold); }
+.hero-headline .char.scrambling { color: var(--smoke); }
+.hero-tagline {
+  font-size: clamp(14px, 2.5vw, 20px);
+  font-weight: 300;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--smoke);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hero-tagline.visible { opacity: 1; transform: translateY(0); }
+.scroll-hint {
+  position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+  z-index: 2;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--smoke);
+  animation: pulse 2.5s ease-in-out infinite;
+}
+.scroll-hint-line {
+  width: 1px; height: 40px; background: linear-gradient(to bottom, var(--gold), transparent);
+}
+@keyframes pulse { 0%,100% { opacity: 0.3; } 50% { opacity: 0.8; } }
+
+/* ─── Marquee ─── */
+.marquee-band {
+  background: var(--navy);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 18px 0;
+  overflow: hidden;
+}
+.marquee-row {
+  display: flex; white-space: nowrap; will-change: transform;
+}
+.marquee-row + .marquee-row { margin-top: 6px; }
+.marquee-item {
+  display: inline-flex; align-items: center;
+  padding: 0 40px; flex-shrink: 0;
+}
+.marquee-filled .marquee-item {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 5vw, 48px);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--cream);
+}
+.marquee-outline .marquee-item {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 5vw, 48px);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--smoke);
+}
+.marquee-item .sep {
+  display: inline-block;
+  width: 8px; height: 8px;
+  background: var(--gold);
+  border-radius: 50%;
+  margin: 0 28px;
+  opacity: 0.6;
+}
+
+/* ─── Curtain Reveal (Story) ─── */
+.curtain-section { position: relative; height: 300vh; }
+.curtain-sticky {
+  position: sticky; top: 0; height: 100dvh;
+  overflow: hidden; display: flex; align-items: center; justify-content: center;
+}
+.curtain-content {
+  position: absolute; inset: 0; z-index: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(26,21,13,0.82), rgba(10,17,20,0.88)), url('https://images.unsplash.com/photo-1595023820784-535eb7749d89?w=1920&h=1080&fit=crop') center/cover;
+  padding: 40px;
+}
+.curtain-content .story-label {
+  font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 24px;
+}
+.curtain-content h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 5vw, 52px);
+  font-weight: 700; letter-spacing: -0.02em;
+  margin-bottom: 20px; max-width: 650px;
+  line-height: 1.2;
+}
+.curtain-content p {
+  font-size: clamp(15px, 1.8vw, 18px);
+  color: var(--smoke); max-width: 50ch;
+  line-height: 1.7; margin-bottom: 32px;
+}
+.curtain-content .cta-btn {
+  display: inline-block;
+  padding: 14px 40px;
+  background: var(--gold); color: var(--midnight);
+  border-radius: 10px; font-size: 14px; font-weight: 600;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s;
+}
+.curtain-content .cta-btn:hover { transform: translateY(-2px) scale(1.03); background: #e0b45e; }
+.curtain-left, .curtain-right {
+  position: absolute; top: 0; bottom: 0; width: 50%;
+  background: var(--midnight); z-index: 2;
+  display: flex; align-items: center;
+  border-right: 1px solid var(--border);
+}
+.curtain-left { left: 0; justify-content: flex-end; padding-right: 24px; }
+.curtain-right { right: 0; justify-content: flex-start; padding-left: 24px; border-right: none; border-left: 1px solid var(--border); }
+.curtain-left h2, .curtain-right h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(48px, 10vw, 120px);
+  font-weight: 900; letter-spacing: 0.05em;
+  line-height: 0.95; color: var(--gold);
+}
+
+/* ─── Menu Section Label ─── */
+.section-header {
+  text-align: center;
+  padding: 100px 24px 48px;
+  background: var(--midnight);
+}
+.section-header .label {
+  font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 16px;
+}
+.section-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(36px, 6vw, 64px);
+  font-weight: 700; letter-spacing: -0.02em;
+}
+.section-header p {
+  margin-top: 12px; font-size: 16px; color: var(--smoke);
+  max-width: 45ch; margin-left: auto; margin-right: auto; line-height: 1.6;
+}
+
+/* ─── Accordion Menu ─── */
+.menu-section {
+  padding: 0 24px 100px;
+  max-width: 1100px; margin: 0 auto;
+  background: var(--midnight);
+}
+.accordion {
+  display: flex; gap: 6px;
+  height: 65vh; min-height: 400px; max-height: 580px;
+}
+.accordion-panel {
+  flex: 1; border-radius: 16px; overflow: hidden;
+  position: relative; cursor: pointer;
+  transition: flex 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.accordion-panel:hover, .accordion-panel.active { flex: 5; }
+.panel-bg {
+  position: absolute; inset: 0;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.accordion-panel:hover .panel-bg,
+.accordion-panel.active .panel-bg { transform: scale(1.05); }
+.panel-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(10,17,20,0.92) 0%, rgba(10,17,20,0.4) 40%, rgba(10,17,20,0.15) 70%);
+}
+.panel-title-v {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+  writing-mode: vertical-rl; text-orientation: mixed;
+  position: absolute; bottom: 28px; left: 16px;
+  color: var(--gold);
+  transition: opacity 0.3s;
+}
+.accordion-panel:hover .panel-title-v,
+.accordion-panel.active .panel-title-v { opacity: 0; }
+.panel-content {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 24px; z-index: 2;
+}
+.panel-cat {
+  font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 12px;
+  opacity: 0; transform: translateY(8px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.1s;
+}
+.panel-h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 700;
+  margin-bottom: 12px;
+  opacity: 0; transform: translateY(10px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
+}
+.panel-dishes {
+  opacity: 0; transform: translateY(10px);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+}
+.panel-dish {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 5px 0;
+  font-size: 13px; color: rgba(245,240,232,0.8);
+  border-bottom: 1px solid rgba(245,240,232,0.08);
+}
+.panel-dish:last-child { border-bottom: none; }
+.panel-dish .price { color: var(--gold); font-weight: 500; white-space: nowrap; margin-left: 12px; }
+.accordion-panel:hover .panel-cat,
+.accordion-panel:hover .panel-h3,
+.accordion-panel:hover .panel-dishes,
+.accordion-panel.active .panel-cat,
+.accordion-panel.active .panel-h3,
+.accordion-panel.active .panel-dishes { opacity: 1; transform: translateY(0); }
+
+/* ─── Wine Horizontal Scroll ─── */
+.wine-section-wrap { background: var(--navy); }
+.wine-header {
+  text-align: center;
+  padding: 100px 24px 48px;
+}
+.wine-header .label {
+  font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 16px;
+}
+.wine-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(36px, 6vw, 64px);
+  font-weight: 700;
+}
+.wine-header p {
+  margin-top: 12px; font-size: 16px; color: var(--smoke);
+  max-width: 45ch; margin-left: auto; margin-right: auto; line-height: 1.6;
+}
+.h-scroll-section { overflow: hidden; }
+.h-scroll-sticky {
+  position: sticky; top: 0; height: 100dvh;
+  display: flex; align-items: center; overflow: hidden;
+}
+.h-scroll-track {
+  display: flex; gap: 24px;
+  padding: 0 max(48px, 5vw);
+  will-change: transform;
+}
+.wine-card {
+  flex-shrink: 0;
+  width: clamp(280px, 35vw, 420px);
+  height: 60vh;
+  border-radius: 20px; overflow: hidden;
+  position: relative;
+  border: 1px solid var(--border);
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 28px;
+  cursor: default;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.wine-card:hover { transform: translateY(-4px); }
+.wine-card-bg {
+  position: absolute; inset: 0; z-index: 0;
+  transition: transform 0.5s ease;
+}
+.wine-card:hover .wine-card-bg { transform: scale(1.04); }
+.wine-card-overlay {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(to top, rgba(10,22,40,0.95) 0%, rgba(10,22,40,0.4) 45%, transparent 75%);
+}
+.wine-card-content { position: relative; z-index: 2; }
+.wine-card-type {
+  font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 8px;
+}
+.wine-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px; font-weight: 700; margin-bottom: 6px;
+}
+.wine-card .wine-meta {
+  font-size: 13px; color: var(--smoke); line-height: 1.5; margin-bottom: 8px;
+}
+.wine-card .wine-price {
+  font-size: 15px; color: var(--gold); font-weight: 600;
+}
+
+/* Wine progress */
+.wine-progress {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+  z-index: 50; display: flex; align-items: center; gap: 12px;
+  opacity: 0; transition: opacity 0.3s;
+  pointer-events: none;
+}
+.wine-progress.visible { opacity: 1; }
+.wine-progress-bar { width: 120px; height: 2px; background: var(--border); border-radius: 1px; overflow: hidden; }
+.wine-progress-fill { height: 100%; background: var(--gold); width: 0%; transition: width 0.1s; }
+.wine-progress-label { font-size: 11px; color: var(--smoke); letter-spacing: 0.08em; }
+
+/* ─── Ambiance (Zoom Parallax) ─── */
+.ambiance-section { position: relative; height: 400vh; background: var(--midnight); }
+.ambiance-sticky {
+  position: sticky; top: 0;
+  min-height: 100dvh; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  perspective: 1000px;
+}
+.zoom-layer {
+  position: absolute; will-change: transform;
+  display: flex; align-items: center; justify-content: center;
+}
+.layer-bg {
+  inset: -20%; z-index: 1;
+  background: radial-gradient(ellipse at 50% 40%, #1a150d 0%, var(--midnight) 70%);
+}
+.layer-mid { inset: 0; z-index: 2; }
+.amb-shape {
+  position: absolute; border-radius: 50%; opacity: 0.12;
+}
+.amb-shape-1 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, var(--gold) 0%, transparent 70%);
+  top: 15%; left: 10%;
+}
+.amb-shape-2 {
+  width: 220px; height: 220px;
+  background: radial-gradient(circle, var(--pepper) 0%, transparent 70%);
+  top: 55%; right: 12%;
+}
+.amb-shape-3 {
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, #5e8aad 0%, transparent 70%);
+  bottom: 10%; left: 35%;
+}
+.layer-fg {
+  inset: 0; z-index: 3;
+  display: flex; align-items: center; justify-content: center;
+}
+.layer-fg .zoom-headline {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(48px, 14vw, 180px);
+  font-weight: 900; letter-spacing: 0.1em;
+  text-align: center; line-height: 0.95;
+  color: var(--cream); opacity: 0.9;
+}
+.layer-reveal {
+  inset: 0; z-index: 4;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  opacity: 0;
+}
+.reveal-card {
+  background: rgba(10, 22, 40, 0.9);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 56px 48px;
+  text-align: center;
+  max-width: 480px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.reveal-card .reveal-label {
+  font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 16px;
+}
+.reveal-card h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 36px; font-weight: 700;
+  margin-bottom: 12px;
+}
+.reveal-card p {
+  font-size: 16px; color: var(--smoke); line-height: 1.6;
+  margin-bottom: 28px;
+}
+.reveal-card .cta-btn {
+  display: inline-block;
+  padding: 14px 40px;
+  background: var(--gold); color: var(--midnight);
+  border-radius: 10px; font-size: 14px; font-weight: 600;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s;
+}
+.reveal-card .cta-btn:hover { transform: translateY(-2px) scale(1.03); background: #e0b45e; }
+
+/* ─── Info Section ─── */
+.info-section {
+  background: var(--navy);
+  padding: 100px 24px;
+  border-top: 1px solid var(--border);
+}
+.info-grid {
+  max-width: 1000px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 64px;
+  align-items: start;
+}
+.info-left .info-label {
+  font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 24px;
+}
+.info-left h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 700; margin-bottom: 32px;
+}
+.info-item {
+  margin-bottom: 24px;
+}
+.info-item h4 {
+  font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 6px; font-weight: 500;
+}
+.info-item p {
+  font-size: 16px; color: var(--cream); line-height: 1.6;
+}
+.info-item a {
+  color: var(--cream);
+  transition: color 0.2s;
+}
+.info-item a:hover { color: var(--gold); }
+.info-right {
+  display: flex; flex-direction: column; gap: 24px;
+}
+.info-map {
+  width: 100%; aspect-ratio: 16/10;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: linear-gradient(135deg, #111825, #0d1420);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.info-map iframe {
+  width: 100%; height: 100%; border: 0; border-radius: 16px;
+  filter: saturate(0.3) brightness(0.7) contrast(1.1);
+  transition: filter 0.4s;
+}
+.info-map:hover iframe { filter: saturate(0.6) brightness(0.85) contrast(1.05); }
+.info-reserve-btn {
+  display: block; width: 100%;
+  padding: 18px;
+  background: var(--gold); color: var(--midnight);
+  border: none; border-radius: 12px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 16px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  cursor: pointer; text-align: center;
+  transition: transform 0.2s, background 0.2s;
+}
+.info-reserve-btn:hover { transform: translateY(-2px); background: #e0b45e; }
+
+/* ─── Footer ─── */
+footer {
+  background: var(--midnight);
+  border-top: 1px solid var(--border);
+  padding: 40px 24px;
+  text-align: center;
+}
+.footer-logo {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px; font-weight: 700;
+  color: var(--gold); margin-bottom: 16px;
+}
+.footer-social {
+  display: flex; gap: 24px; justify-content: center;
+  margin-bottom: 20px;
+}
+.footer-social a {
+  font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--smoke);
+  transition: color 0.2s;
+}
+.footer-social a:hover { color: var(--gold); }
+.footer-legal {
+  font-size: 12px; color: rgba(139,139,139,0.5);
+}
+
+/* ─── Mobile Sticky Reserve ─── */
+.mobile-reserve {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  z-index: 90;
+  padding: 12px 16px;
+  background: rgba(10, 17, 20, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+}
+.mobile-reserve a {
+  display: block; width: 100%;
+  padding: 14px;
+  background: var(--gold); color: var(--midnight);
+  border-radius: 10px;
+  font-size: 14px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  text-align: center;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .nav-links.open {
+    display: flex; flex-direction: column;
+    position: fixed; inset: 0;
+    background: rgba(10, 17, 20, 0.97);
+    backdrop-filter: blur(20px);
+    align-items: center; justify-content: center;
+    gap: 28px; z-index: 100;
+  }
+  .nav-links.open a { font-size: 18px; opacity: 1; }
+  .nav-toggle { display: block; z-index: 101; }
+
+  .accordion {
+    flex-direction: column;
+    height: auto; min-height: auto; max-height: none;
+  }
+  .accordion-panel {
+    height: 60px; flex: none !important;
+  }
+  .accordion-panel:hover, .accordion-panel.active {
+    height: 320px; flex: none !important;
+  }
+  .panel-title-v {
+    writing-mode: horizontal-tb;
+    position: absolute; bottom: auto; top: 50%; left: 20px;
+    transform: translateY(-50%);
+  }
+  .accordion-panel:hover .panel-title-v,
+  .accordion-panel.active .panel-title-v { opacity: 0; }
+
+  /* Horizontal scroll becomes vertical on mobile */
+  .h-scroll-section { height: auto !important; }
+  .h-scroll-sticky {
+    position: relative; height: auto;
+    flex-direction: column; padding: 0 16px 60px;
+  }
+  .h-scroll-track {
+    flex-direction: column; gap: 16px;
+    transform: none !important;
+    padding: 0;
+  }
+  .wine-card {
+    width: 100%; height: 300px;
+  }
+  .wine-progress { display: none !important; }
+
+  .info-grid { grid-template-columns: 1fr; gap: 40px; }
+
+  .mobile-reserve { display: block; }
+  footer { padding-bottom: 80px; }
+
+  .curtain-left h2, .curtain-right h2 {
+    font-size: clamp(36px, 8vw, 80px);
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav class="nav" id="mainNav">
+  <div class="nav-logo">BillyJean</div>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="nav-links" id="navLinks">
+    <a href="#story">Notre Histoire</a>
+    <a href="#menu">Menu</a>
+    <a href="#vins">Vins & Cocktails</a>
+    <a href="#info">Contact</a>
+    <a href="#info" class="nav-cta">Reserver</a>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero" id="hero">
+  <canvas class="hero-canvas" id="heroMesh"></canvas>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-headline" id="heroHeadline"></div>
+    <div class="hero-tagline" id="heroTagline">Tapas & Vins Naturels — Biarritz</div>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-hint-line"></div>
+  </div>
+</section>
+
+<!-- ═══ MARQUEE ═══ -->
+<div class="marquee-band">
+  <div class="marquee-row marquee-filled" data-speed="1" data-direction="left">
+    <div class="marquee-content">
+      <span class="marquee-item">TAPAS<span class="sep"></span></span>
+      <span class="marquee-item">VINS NATURELS<span class="sep"></span></span>
+      <span class="marquee-item">BIARRITZ<span class="sep"></span></span>
+      <span class="marquee-item">DEPUIS 2026<span class="sep"></span></span>
+    </div>
+  </div>
+  <div class="marquee-row marquee-outline" data-speed="0.7" data-direction="right">
+    <div class="marquee-content">
+      <span class="marquee-item">TAPAS<span class="sep"></span></span>
+      <span class="marquee-item">VINS NATURELS<span class="sep"></span></span>
+      <span class="marquee-item">BIARRITZ<span class="sep"></span></span>
+      <span class="marquee-item">DEPUIS 2026<span class="sep"></span></span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ STORY — CURTAIN REVEAL ═══ -->
+<section class="curtain-section" id="story">
+  <div class="curtain-sticky">
+    <div class="curtain-content">
+      <div class="story-label">Notre Histoire</div>
+      <h3>Where Basque soul meets midnight groove</h3>
+      <p>Born from late nights in Biarritz and a love for shared plates, BillyJean is where the warmth of Basque tradition meets the pulse of something electric. Small plates, natural wines, and conversations that last until the candles burn out.</p>
+      <a href="#info" class="cta-btn">Reserver une table</a>
+    </div>
+    <div class="curtain-left" id="cLeft"><h2>BILLY</h2></div>
+    <div class="curtain-right" id="cRight"><h2>JEAN</h2></div>
+  </div>
+</section>
+
+<!-- ═══ MENU — ACCORDION ═══ -->
+<div id="menu">
+  <div class="section-header">
+    <div class="label">Les Tapas</div>
+    <h2>Le Menu</h2>
+    <p>Sharing is the point. Order three, order ten — every plate belongs in the middle of the table.</p>
+  </div>
+  <section class="menu-section">
+    <div class="accordion">
+      <!-- Frio -->
+      <div class="accordion-panel active">
+        <div class="panel-bg" style="background: url('https://images.unsplash.com/photo-1600891965483-0a429ebf9076?w=800&h=600&fit=crop') center/cover;"></div>
+        <div class="panel-overlay"></div>
+        <div class="panel-title-v">Frio</div>
+        <div class="panel-content">
+          <div class="panel-cat">Frio — Cold</div>
+          <div class="panel-h3">Fresh & Cured</div>
+          <div class="panel-dishes">
+            <div class="panel-dish"><span>Jambon Iberico 24 mois</span><span class="price">18 &euro;</span></div>
+            <div class="panel-dish"><span>Anchois de Getaria</span><span class="price">12 &euro;</span></div>
+            <div class="panel-dish"><span>Gaspacho basque, piment</span><span class="price">9 &euro;</span></div>
+            <div class="panel-dish"><span>Tartare de thon, yuzu</span><span class="price">16 &euro;</span></div>
+            <div class="panel-dish"><span>Burrata, tomate coeur de boeuf</span><span class="price">14 &euro;</span></div>
+          </div>
+        </div>
+      </div>
+      <!-- Caliente -->
+      <div class="accordion-panel">
+        <div class="panel-bg" style="background: url('https://images.unsplash.com/photo-1626011852881-4609127619a8?w=800&h=600&fit=crop') center/cover;"></div>
+        <div class="panel-overlay"></div>
+        <div class="panel-title-v">Caliente</div>
+        <div class="panel-content">
+          <div class="panel-cat">Caliente — Hot</div>
+          <div class="panel-h3">From the Fire</div>
+          <div class="panel-dishes">
+            <div class="panel-dish"><span>Croquetas de jamon</span><span class="price">10 &euro;</span></div>
+            <div class="panel-dish"><span>Pimientos de padron</span><span class="price">8 &euro;</span></div>
+            <div class="panel-dish"><span>Tortilla espagnole, aioli</span><span class="price">11 &euro;</span></div>
+            <div class="panel-dish"><span>Pintxos de txistorra</span><span class="price">9 &euro;</span></div>
+            <div class="panel-dish"><span>Champignons a l'ail noir</span><span class="price">12 &euro;</span></div>
+          </div>
+        </div>
+      </div>
+      <!-- Mar -->
+      <div class="accordion-panel">
+        <div class="panel-bg" style="background: url('https://images.unsplash.com/photo-1565686481561-d8ceaa689e01?w=800&h=600&fit=crop') center/cover;"></div>
+        <div class="panel-overlay"></div>
+        <div class="panel-title-v">Mar</div>
+        <div class="panel-content">
+          <div class="panel-cat">Mar — Seafood</div>
+          <div class="panel-h3">From the Atlantic</div>
+          <div class="panel-dishes">
+            <div class="panel-dish"><span>Gambas al ajillo</span><span class="price">16 &euro;</span></div>
+            <div class="panel-dish"><span>Pulpo a la gallega</span><span class="price">18 &euro;</span></div>
+            <div class="panel-dish"><span>Moules au txakoli</span><span class="price">14 &euro;</span></div>
+            <div class="panel-dish"><span>Chipirons frits, encre</span><span class="price">15 &euro;</span></div>
+          </div>
+        </div>
+      </div>
+      <!-- Tabla -->
+      <div class="accordion-panel">
+        <div class="panel-bg" style="background: url('https://images.unsplash.com/photo-1553653760-d787a53b4bbe?w=800&h=600&fit=crop') center/cover;"></div>
+        <div class="panel-overlay"></div>
+        <div class="panel-title-v">Tabla</div>
+        <div class="panel-content">
+          <div class="panel-cat">Tabla — Boards</div>
+          <div class="panel-h3">To Share</div>
+          <div class="panel-dishes">
+            <div class="panel-dish"><span>Planche mixte (jamon, fromage, olives)</span><span class="price">24 &euro;</span></div>
+            <div class="panel-dish"><span>Fromages basques affines</span><span class="price">18 &euro;</span></div>
+            <div class="panel-dish"><span>Charcuterie du Pays</span><span class="price">20 &euro;</span></div>
+          </div>
+        </div>
+      </div>
+      <!-- Dulce -->
+      <div class="accordion-panel">
+        <div class="panel-bg" style="background: url('https://images.unsplash.com/photo-1547149685-22d7efe78c2d?w=800&h=600&fit=crop') center/cover;"></div>
+        <div class="panel-overlay"></div>
+        <div class="panel-title-v">Dulce</div>
+        <div class="panel-content">
+          <div class="panel-cat">Dulce — Sweet</div>
+          <div class="panel-h3">To Finish</div>
+          <div class="panel-dishes">
+            <div class="panel-dish"><span>Gateau basque, cerise noire</span><span class="price">10 &euro;</span></div>
+            <div class="panel-dish"><span>Crema catalana brulee</span><span class="price">9 &euro;</span></div>
+            <div class="panel-dish"><span>Churros, chocolat noir</span><span class="price">8 &euro;</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══ WINE — HORIZONTAL SCROLL ═══ -->
+<div class="wine-section-wrap" id="vins">
+  <div class="wine-header">
+    <div class="label">La Bodega</div>
+    <h2>Vins & Cocktails</h2>
+    <p>Natural wines from Basque Country to Rioja. Cocktails that don't apologise.</p>
+  </div>
+  <section class="h-scroll-section" id="hSection">
+    <div class="h-scroll-sticky">
+      <div class="h-scroll-track" id="hTrack">
+        <!-- Wine 1 -->
+        <div class="wine-card">
+          <div class="wine-card-bg" style="background: url('https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=600&h=800&fit=crop') center/cover;"></div>
+          <div class="wine-card-overlay"></div>
+          <div class="wine-card-content">
+            <div class="wine-card-type">Vin Rouge</div>
+            <h3>Rioja Reserva</h3>
+            <div class="wine-meta">Tempranillo · La Rioja, Espagne<br>Cherry, vanilla, leather. 18 months in oak.</div>
+            <div class="wine-price">Verre 9 &euro; · Bouteille 38 &euro;</div>
+          </div>
+        </div>
+        <!-- Wine 2 -->
+        <div class="wine-card">
+          <div class="wine-card-bg" style="background: url('https://images.unsplash.com/photo-1654961296571-c9b5e1061c11?w=600&h=800&fit=crop') center/cover;"></div>
+          <div class="wine-card-overlay"></div>
+          <div class="wine-card-content">
+            <div class="wine-card-type">Vin Blanc</div>
+            <h3>Txakoli</h3>
+            <div class="wine-meta">Hondarrabi Zuri · Pays Basque<br>Citrus, green apple, sea spray. Light effervescence.</div>
+            <div class="wine-price">Verre 7 &euro; · Bouteille 28 &euro;</div>
+          </div>
+        </div>
+        <!-- Wine 3 -->
+        <div class="wine-card">
+          <div class="wine-card-bg" style="background: url('https://images.unsplash.com/photo-1677110804636-1e5f864195b4?w=600&h=800&fit=crop') center/cover;"></div>
+          <div class="wine-card-overlay"></div>
+          <div class="wine-card-content">
+            <div class="wine-card-type">Vin Nature</div>
+            <h3>Pet-Nat Rose</h3>
+            <div class="wine-meta">Grenache · Navarra<br>Wild strawberry, brioche, natural fizz. Unfiltered.</div>
+            <div class="wine-price">Verre 8 &euro; · Bouteille 32 &euro;</div>
+          </div>
+        </div>
+        <!-- Cocktail 1 -->
+        <div class="wine-card">
+          <div class="wine-card-bg" style="background: url('https://images.unsplash.com/photo-1617528342270-236d833b8f1d?w=600&h=800&fit=crop') center/cover;"></div>
+          <div class="wine-card-overlay"></div>
+          <div class="wine-card-content">
+            <div class="wine-card-type">Cocktail Signature</div>
+            <h3>Moonwalker</h3>
+            <div class="wine-meta">Mezcal, chartreuse verte, citron vert, sirop de basilic, sel de piment d'Espelette</div>
+            <div class="wine-price">14 &euro;</div>
+          </div>
+        </div>
+        <!-- Cocktail 2 -->
+        <div class="wine-card">
+          <div class="wine-card-bg" style="background: url('https://images.unsplash.com/photo-1752141930096-ac8292d6a15a?w=600&h=800&fit=crop') center/cover;"></div>
+          <div class="wine-card-overlay"></div>
+          <div class="wine-card-content">
+            <div class="wine-card-type">Cocktail Signature</div>
+            <h3>Billie's Negroni</h3>
+            <div class="wine-meta">Gin basque, Campari, vermouth rouge, zeste d'orange brulee</div>
+            <div class="wine-price">13 &euro;</div>
+          </div>
+        </div>
+        <!-- Cocktail 3 -->
+        <div class="wine-card">
+          <div class="wine-card-bg" style="background: url('https://images.unsplash.com/photo-1578467759626-f94129ea94a4?w=600&h=800&fit=crop') center/cover;"></div>
+          <div class="wine-card-overlay"></div>
+          <div class="wine-card-content">
+            <div class="wine-card-type">Cocktail Signature</div>
+            <h3>Cote Basque Spritz</h3>
+            <div class="wine-meta">Txakoli, Aperol, eau de fleur de sureau, prosecco, olive verte</div>
+            <div class="wine-price">12 &euro;</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="wine-progress" id="wineProgress">
+  <div class="wine-progress-bar"><div class="wine-progress-fill" id="wineFill"></div></div>
+  <div class="wine-progress-label" id="wineLabel">1 / 6</div>
+</div>
+
+<!-- ═══ AMBIANCE — ZOOM PARALLAX ═══ -->
+<section class="ambiance-section" id="ambiance">
+  <div class="ambiance-sticky">
+    <div class="zoom-layer layer-bg"></div>
+    <div class="zoom-layer layer-mid">
+      <div class="amb-shape amb-shape-1"></div>
+      <div class="amb-shape amb-shape-2"></div>
+      <div class="amb-shape amb-shape-3"></div>
+    </div>
+    <div class="zoom-layer layer-fg">
+      <div class="zoom-headline">L'AMBIANCE</div>
+    </div>
+    <div class="zoom-layer layer-reveal">
+      <div class="reveal-card">
+        <div class="reveal-label">Rejoignez-nous</div>
+        <h2>Your table awaits</h2>
+        <p>Every evening from 18h. No rush, no pretence. Just good food, honest wine, and the hum of a room that knows how to live.</p>
+        <a href="#info" class="cta-btn">Reserver</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ INFO ═══ -->
+<section class="info-section" id="info">
+  <div class="info-grid">
+    <div class="info-left">
+      <div class="info-label">Rendez-vous</div>
+      <h2>Find Us</h2>
+      <div class="info-item">
+        <h4>Adresse</h4>
+        <p>12 Rue du Port Vieux<br>64200 Biarritz, France</p>
+      </div>
+      <div class="info-item">
+        <h4>Horaires</h4>
+        <p>Mar — Sam : 18h00 — 01h00<br>Dim : 18h00 — 23h00<br>Lun : Ferme</p>
+      </div>
+      <div class="info-item">
+        <h4>Telephone</h4>
+        <p><a href="tel:+33559123456">+33 5 59 12 34 56</a></p>
+      </div>
+      <div class="info-item">
+        <h4>Suivez-nous</h4>
+        <p><a href="#">@billyjean.biarritz</a></p>
+      </div>
+    </div>
+    <div class="info-right">
+      <div class="info-map">
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2898.5!2d-1.5653!3d43.4832!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd51152b0c0b0001%3A0x0!2sPort%20Vieux%2C%20Biarritz!5e0!3m2!1sfr!2sfr!4v1" width="100%" height="100%" style="border:0; border-radius:16px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+      <a href="#" class="info-reserve-btn">Reserver une table</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="footer-logo">BillyJean</div>
+  <div class="footer-social">
+    <a href="#">Instagram</a>
+    <a href="#">Facebook</a>
+    <a href="#">Google Maps</a>
+  </div>
+  <div class="footer-legal">&copy; 2026 BillyJean Biarritz. Tous droits reserves.</div>
+</footer>
+
+<!-- ═══ MOBILE STICKY RESERVE ═══ -->
+<div class="mobile-reserve">
+  <a href="#">Reserver une table</a>
+</div>
+
+<!-- ═══ JAVASCRIPT ═══ -->
+<script>
+(function() {
+  'use strict';
+  gsap.registerPlugin(ScrollTrigger);
+
+  // ─── NAV ───
+  var nav = document.getElementById('mainNav');
+  var navToggle = document.getElementById('navToggle');
+  var navLinks = document.getElementById('navLinks');
+
+  window.addEventListener('scroll', function() {
+    nav.classList.toggle('scrolled', window.scrollY > 80);
+  });
+
+  navToggle.addEventListener('click', function() {
+    navToggle.classList.toggle('open');
+    navLinks.classList.toggle('open');
+  });
+
+  // Close mobile nav on link click
+  navLinks.querySelectorAll('a').forEach(function(a) {
+    a.addEventListener('click', function() {
+      navToggle.classList.remove('open');
+      navLinks.classList.remove('open');
+    });
+  });
+
+  // ─── HERO MESH GRADIENT ───
+  (function() {
+    var canvas = document.getElementById('heroMesh');
+    var ctx = canvas.getContext('2d');
+    var colors = [
+      'rgba(212,168,83,0.25)',   // gold
+      'rgba(196,72,62,0.15)',    // pepper
+      'rgba(94,138,173,0.12)',   // blue
+      'rgba(168,140,100,0.18)'   // warm
+    ];
+    var blobs = colors.map(function(c) {
+      return {
+        x: Math.random(), y: Math.random(),
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        r: 0.3 + Math.random() * 0.25,
+        color: c
+      };
+    });
+    function resize() {
+      canvas.width = canvas.offsetWidth * 2;
+      canvas.height = canvas.offsetHeight * 2;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    function draw() {
+      var w = canvas.width, h = canvas.height;
+      ctx.fillStyle = '#0A1114';
+      ctx.fillRect(0, 0, w, h);
+      blobs.forEach(function(b) {
+        b.x += b.vx / w;
+        b.y += b.vy / h;
+        if (b.x < -0.2 || b.x > 1.2) b.vx *= -1;
+        if (b.y < -0.2 || b.y > 1.2) b.vy *= -1;
+        var grd = ctx.createRadialGradient(b.x * w, b.y * h, 0, b.x * w, b.y * h, b.r * Math.max(w, h));
+        grd.addColorStop(0, b.color);
+        grd.addColorStop(1, 'transparent');
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, w, h);
+        ctx.globalCompositeOperation = 'source-over';
+      });
+      requestAnimationFrame(draw);
+    }
+    draw();
+  })();
+
+  // ─── HERO TEXT SCRAMBLE ───
+  (function() {
+    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%&*';
+    var el = document.getElementById('heroHeadline');
+    var finalText = 'BILLYJEAN';
+    var duration = 1800;
+
+    // Show scrambled placeholder immediately
+    el.innerHTML = finalText.split('').map(function() {
+      return '<span class="char scrambling">' + chars[Math.floor(Math.random() * chars.length)] + '</span>';
+    }).join('');
+
+    // Start decode after 500ms
+    setTimeout(function() {
+      var startTime = null;
+      var len = finalText.length;
+
+      function frame(ts) {
+        if (!startTime) startTime = ts;
+        var elapsed = ts - startTime;
+        var progress = Math.min(elapsed / duration, 1);
+        var html = '';
+
+        for (var i = 0; i < len; i++) {
+          var charThreshold = (i / len) * 0.65 + 0.2;
+          if (progress >= charThreshold) {
+            html += '<span class="char resolved">' + finalText[i] + '</span>';
+          } else {
+            html += '<span class="char scrambling">' + chars[Math.floor(Math.random() * chars.length)] + '</span>';
+          }
+        }
+        el.innerHTML = html;
+
+        if (progress < 1) {
+          requestAnimationFrame(frame);
+        } else {
+          // Show tagline after scramble completes
+          document.getElementById('heroTagline').classList.add('visible');
+        }
+      }
+      requestAnimationFrame(frame);
+    }, 500);
+  })();
+
+  // ─── MARQUEE ───
+  (function() {
+    // Clone content for seamless loop
+    document.querySelectorAll('.marquee-row').forEach(function(row) {
+      var content = row.querySelector('.marquee-content');
+      var clone = content.cloneNode(true);
+      row.appendChild(clone);
+    });
+
+    var rows = document.querySelectorAll('.marquee-row');
+    var baseSpeed = 60;
+    var scrollVelocity = 0;
+
+    ScrollTrigger.create({
+      onUpdate: function(self) {
+        scrollVelocity = Math.abs(self.getVelocity());
+      }
+    });
+
+    rows.forEach(function(row) {
+      var content = row.querySelector('.marquee-content');
+      var direction = row.dataset.direction === 'right' ? 1 : -1;
+      var speedMult = parseFloat(row.dataset.speed) || 1;
+      var contentWidth = content.offsetWidth;
+      var x = direction === -1 ? 0 : -contentWidth;
+
+      function animate() {
+        var speed = (baseSpeed + scrollVelocity * 0.08) * speedMult;
+        x += direction * -1 * speed / 60;
+        if (direction === -1 && x <= -contentWidth) x += contentWidth;
+        if (direction === 1 && x >= 0) x -= contentWidth;
+        row.style.transform = 'translateX(' + x + 'px)';
+        requestAnimationFrame(animate);
+      }
+      animate();
+    });
+  })();
+
+  // ─── CURTAIN REVEAL ───
+  (function() {
+    var s = document.querySelector('.curtain-section');
+    gsap.to('#cLeft', {
+      xPercent: -100,
+      ease: 'power2.inOut',
+      scrollTrigger: { trigger: s, start: 'top top', end: '60% top', scrub: 0.5 }
+    });
+    gsap.to('#cRight', {
+      xPercent: 100,
+      ease: 'power2.inOut',
+      scrollTrigger: { trigger: s, start: 'top top', end: '60% top', scrub: 0.5 }
+    });
+  })();
+
+  // ─── ACCORDION MENU ───
+  document.querySelectorAll('.accordion-panel').forEach(function(panel) {
+    panel.addEventListener('click', function() {
+      var siblings = panel.parentElement.children;
+      for (var i = 0; i < siblings.length; i++) siblings[i].classList.remove('active');
+      panel.classList.add('active');
+    });
+  });
+
+  // ─── HORIZONTAL SCROLL (WINE) — Desktop only ───
+  (function() {
+    if (window.innerWidth <= 768) return;
+
+    var track = document.getElementById('hTrack');
+    var section = document.getElementById('hSection');
+    var cards = track.querySelectorAll('.wine-card');
+    var progress = document.getElementById('wineProgress');
+    var fill = document.getElementById('wineFill');
+    var label = document.getElementById('wineLabel');
+    var totalCards = cards.length;
+
+    function getScrollDistance() {
+      return track.scrollWidth - window.innerWidth;
+    }
+
+    section.style.height = (totalCards * 100) + 'vh';
+
+    gsap.to(track, {
+      x: function() { return -getScrollDistance(); },
+      ease: 'none',
+      scrollTrigger: {
+        trigger: section,
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: 0.5,
+        invalidateOnRefresh: true,
+        onUpdate: function(self) {
+          var p = self.progress;
+          fill.style.width = (p * 100) + '%';
+          label.textContent = Math.min(Math.ceil(p * totalCards + 0.5), totalCards) + ' / ' + totalCards;
+        },
+        onEnter: function() { progress.classList.add('visible'); },
+        onLeave: function() { progress.classList.remove('visible'); },
+        onEnterBack: function() { progress.classList.add('visible'); },
+        onLeaveBack: function() { progress.classList.remove('visible'); }
+      }
+    });
+  })();
+
+  // ─── ZOOM PARALLAX (AMBIANCE) ───
+  (function() {
+    var section = document.querySelector('.ambiance-section');
+
+    gsap.fromTo('.layer-bg', { scale: 1 }, {
+      scale: 1.15, ease: 'none',
+      scrollTrigger: { trigger: section, start: 'top top', end: 'bottom bottom', scrub: true }
+    });
+
+    gsap.fromTo('.layer-mid', { scale: 1, y: 0 }, {
+      scale: 1.6, y: -100, ease: 'none',
+      scrollTrigger: { trigger: section, start: 'top top', end: 'bottom bottom', scrub: true }
+    });
+
+    gsap.fromTo('.layer-fg', { scale: 1, opacity: 0.9 }, {
+      scale: 6, opacity: 0, ease: 'none',
+      scrollTrigger: { trigger: section, start: 'top top', end: '50% top', scrub: true }
+    });
+
+    gsap.fromTo('.layer-reveal',
+      { opacity: 0, scale: 0.85 },
+      { opacity: 1, scale: 1, ease: 'power2.out',
+        scrollTrigger: { trigger: section, start: '40% top', end: '55% top', scrub: true }
+      }
+    );
+
+    gsap.fromTo('.layer-reveal',
+      { opacity: 1 },
+      { opacity: 0,
+        scrollTrigger: { trigger: section, start: '75% top', end: '90% top', scrub: true }
+      }
+    );
+  })();
+
+})();
+</script>
+</body>
+</html>
