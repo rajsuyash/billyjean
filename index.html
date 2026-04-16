@@ -1407,12 +1407,23 @@ footer {
     document.getElementById('mjForm').addEventListener('submit', function(e) {
       e.preventDefault();
       var email = document.getElementById('mjEmail').value;
-      // Store in localStorage as simple waitlist (replace with real backend later)
-      var waitlist = JSON.parse(localStorage.getItem('bjWaitlist') || '[]');
-      waitlist.push({ email: email, date: new Date().toISOString() });
-      localStorage.setItem('bjWaitlist', JSON.stringify(waitlist));
-      document.getElementById('mjForm').style.display = 'none';
-      document.getElementById('mjSuccess').style.display = 'block';
+      var btn = document.querySelector('#mjForm .mj-cta');
+      btn.textContent = 'Sending...';
+      btn.disabled = true;
+      fetch('https://script.google.com/macros/s/AKfycbxp2KnCLB3FAu86biNUKRztoPqWDlc0rLc00aVPLeqIN2kUMuyL75PobwuzQfTNHKe8ww/exec', {
+        method: 'POST',
+        body: JSON.stringify({ email: email }),
+        mode: 'no-cors'
+      }).then(function() {
+        document.getElementById('mjForm').style.display = 'none';
+        document.getElementById('mjSuccess').style.display = 'block';
+      }).catch(function() {
+        document.getElementById('mjForm').style.display = 'none';
+        document.getElementById('mjSuccess').style.display = 'block';
+      }).finally(function() {
+        btn.textContent = 'Join the waitlist';
+        btn.disabled = false;
+      });
     });
   })();
 
