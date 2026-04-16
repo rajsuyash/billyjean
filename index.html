@@ -185,7 +185,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ─── Curtain Reveal (Story) ─── */
-.curtain-section { position: relative; height: 100vh; }
+.curtain-section { position: relative; }
 .curtain-sticky {
   position: sticky; top: 0; height: 100dvh;
   overflow: hidden; display: flex; align-items: center; justify-content: center;
@@ -1138,17 +1138,19 @@ footer {
 
   // ─── CURTAIN REVEAL ───
   (function() {
+    var sticky = document.querySelector('.curtain-sticky');
     var s = document.querySelector('.curtain-section');
-    gsap.to('#cLeft', {
-      xPercent: -100,
-      ease: 'power2.inOut',
-      scrollTrigger: { trigger: s, start: 'top top', end: '60% top', scrub: 0.5 }
+    var tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: s,
+        start: 'top top',
+        end: '+=150%',
+        scrub: 0.5,
+        pin: sticky
+      }
     });
-    gsap.to('#cRight', {
-      xPercent: 100,
-      ease: 'power2.inOut',
-      scrollTrigger: { trigger: s, start: 'top top', end: '60% top', scrub: 0.5 }
-    });
+    tl.to('#cLeft', { xPercent: -100, ease: 'power2.inOut' }, 0);
+    tl.to('#cRight', { xPercent: 100, ease: 'power2.inOut' }, 0);
   })();
 
   // ─── ACCORDION MENU ───
