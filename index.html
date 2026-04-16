@@ -1071,10 +1071,18 @@ footer {
   <button class="mj-close" id="mjClose">&times;</button>
   <div class="mj-sparkles" id="mjSparkles"></div>
   <div class="mj-modal">
-    <div class="mj-emoji">🕺</div>
+    <div class="mj-emoji" style="font-size:48px;">✦</div>
     <div class="mj-headline">"Don't stop 'til you get enough"</div>
     <div class="mj-sub">Tables are filling up fast — slide into the waitlist</div>
-    <a href="tel:+33699059081" class="mj-cta">Call to reserve</a>
+    <form id="mjForm" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;animation:mjSlide 0.6s 0.5s both cubic-bezier(0.16,1,0.3,1);">
+      <input type="email" id="mjEmail" placeholder="your@email.com" required style="padding:16px 24px;border-radius:50px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.08);color:var(--cream);font-family:'Outfit',sans-serif;font-size:16px;min-width:260px;outline:none;transition:border-color 0.2s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='rgba(255,255,255,0.15)'">
+      <button type="submit" class="mj-cta" style="border:none;cursor:pointer;">Join the waitlist</button>
+    </form>
+    <div id="mjSuccess" style="display:none;animation:mjSlide 0.4s both cubic-bezier(0.16,1,0.3,1);">
+      <div style="font-size:48px;margin-bottom:12px;">🎉</div>
+      <div style="font-family:'Playfair Display',serif;font-size:24px;color:var(--gold);font-style:italic;">"You've been hit by a smooth reservation"</div>
+      <div style="color:var(--smoke);margin-top:8px;font-size:15px;">We'll be in touch soon</div>
+    </div>
   </div>
 </div>
 
@@ -1372,6 +1380,9 @@ footer {
     function openModal(e) {
       e.preventDefault();
       overlay.querySelector('.mj-headline').textContent = randomQuote();
+      document.getElementById('mjForm').style.display = 'flex';
+      document.getElementById('mjSuccess').style.display = 'none';
+      document.getElementById('mjEmail').value = '';
       spawnSparkles();
       overlay.classList.add('active');
     }
@@ -1391,6 +1402,17 @@ footer {
     });
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') closeModal();
+    });
+
+    document.getElementById('mjForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var email = document.getElementById('mjEmail').value;
+      // Store in localStorage as simple waitlist (replace with real backend later)
+      var waitlist = JSON.parse(localStorage.getItem('bjWaitlist') || '[]');
+      waitlist.push({ email: email, date: new Date().toISOString() });
+      localStorage.setItem('bjWaitlist', JSON.stringify(waitlist));
+      document.getElementById('mjForm').style.display = 'none';
+      document.getElementById('mjSuccess').style.display = 'block';
     });
   })();
 
